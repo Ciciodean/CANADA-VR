@@ -24,9 +24,6 @@ PAGE = """<!doctype html>
   header { padding:18px 22px 6px; }
   h1 { font-size:19px; margin:0; }
   h1 small { color:var(--muted); font-weight:400; font-size:13px; }
-  .banner { margin:12px 22px; padding:10px 14px; border-radius:8px;
-            background:var(--warnbg); color:var(--warn); font-size:13px;
-            border:1px solid #fcd34d; }
   .tabs { display:flex; gap:8px; padding:6px 22px; }
   .tabs button { background:var(--card); color:var(--muted); border:1px solid #334155;
                  border-radius:8px 8px 0 0; padding:9px 16px; cursor:pointer;
@@ -77,9 +74,6 @@ PAGE = """<!doctype html>
   <h1>CANADA VR <small>BC &amp; AAMVA driver&rsquo;s-licence PDF417
       &middot; synthetic fixtures for software testing</small></h1>
 </header>
-<div class="banner">&#9888;&#65039; <b>Synthetic test data only.</b> This tool exists so you can
-unit-test barcode parsers / verification software. Everything it emits is fictitious sample data.
-Using fabricated barcodes as real identification is a criminal offence.</div>
 
 <div class="tabs">
   <button class="active" onclick="tab('bc',this)">BC track format</button>
