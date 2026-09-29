@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Canada VR — Licence Barcode Test-Data Generator (offline)</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --fg:#e2e8f0; --muted:#94a3b8;
+          --accent:#38bdf8; --warn:#b45309; --warnbg:#fffbeb; --ok:#16a34a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+         background:var(--bg); color:var(--fg); }
+  header { padding:18px 22px 6px; }
+  h1 { font-size:19px; margin:0; }
+  h1 small { color:var(--muted); font-weight:400; font-size:13px; }
+  .banner { margin:12px 22px; padding:10px 14px; border-radius:8px;
+            background:var(--warnbg); color:var(--warn); font-size:13px;
+            border:1px solid #fcd34d; }
+  .pill { display:inline-block; margin:2px 22px 0; padding:4px 10px; border-radius:99px;
+          background:#052e16; color:#4ade80; border:1px solid #166534; font-size:12px; }
+  .tabs { display:flex; gap:8px; padding:10px 22px 6px; flex-wrap:wrap; }
+  .tabs button { background:var(--card); color:var(--muted); border:1px solid #334155;
+                 border-radius:8px 8px 0 0; padding:9px 16px; cursor:pointer;
+                 font-size:14px; }
+  .tabs button.active { color:var(--fg); border-bottom-color:transparent;
+                        background:#263449; }
+  .panel { display:none; margin:0 22px 22px; padding:18px; background:var(--card);
+           border:1px solid #334155; border-radius:0 8px 8px 8px; }
+  .panel.active { display:block; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+          gap:10px 14px; max-width:980px; }
+  label { font-size:11px; color:var(--muted); display:block; margin-bottom:3px;
+          text-transform:uppercase; letter-spacing:.4px; }
+  input, select, textarea { width:100%; background:#0b1220; color:var(--fg);
+        border:1px solid #334155; border-radius:6px; padding:7px 9px; font-size:14px;
+        font-family:ui-monospace,Menlo,Consolas,monospace; }
+  textarea { min-height:120px; }
+  .opts { display:flex; flex-wrap:wrap; gap:14px; margin-top:14px; align-items:end; }
+  .opts > div { min-width:130px; }
+  button.go { margin-top:16px; background:var(--accent); color:#082f49; border:0;
+              font-weight:700; font-size:15px; border-radius:8px; padding:11px 26px;
+              cursor:pointer; }
+  button.go:hover:not(:disabled) { filter:brightness(1.1); }
+  button.ghost { margin-top:16px; background:transparent; color:var(--accent);
+                 border:1px dashed var(--accent); font-weight:600; font-size:13px;
+                 border-radius:8px; padding:9px 16px; cursor:pointer; }
+  button.ghost:hover { background:rgba(56,189,248,.12); }
+  button.go:disabled { opacity:.6; cursor:wait; }
+  #result { margin:0 22px 30px; display:none; }
+  #result article { background:var(--card); border:1px solid #334155;
+                    border-radius:8px; padding:18px; }
+  #bcimg { background:#fff; padding:12px; border-radius:6px; max-width:100%;
+           image-rendering:pixelated; }
+  pre { background:#0b1220; border:1px solid #334155; border-radius:6px;
+        padding:12px; font-size:12px; white-space:pre-wrap; word-break:break-all;
+        max-height:180px; overflow:auto; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .row a, #dl_zip { background:#334155; color:var(--fg); text-decoration:none;
+        padding:8px 14px; border-radius:6px; font-size:13px; cursor:pointer; }
+  .row a:hover, #dl_zip:hover { background:#475569; }
+  #dl_zip { background:var(--ok); color:#fff; font-weight:600; padding:10px 18px;
+            border-radius:8px; }
+  #dl_zip:hover { background:#15803d; }
+  .err { color:#f87171; margin-top:12px; font-size:13px; }
+  h3 { margin:0 0 10px; font-size:14px; color:var(--accent); }
+  .section { margin-top:16px; padding-top:12px; border-top:1px solid #334155; }
+  footer { color:var(--muted); font-size:12px; padding:0 22px 30px; line-height:1.6; }
+  code { background:#0b1220; padding:1px 5px; border-radius:4px; font-size:11px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>CANADA VR <small>BC &amp; AAMVA driver&rsquo;s-licence PDF417
+      &middot; synthetic fixtures for software testing</small></h1>
+</header>
+<div class="banner">&#9888;&#65039; <b>Synthetic test data only.</b> This tool produces fictitious
+barcodes so you can unit-test barcode parsers / verification software. Using fabricated barcodes
+as real identification is a criminal offence.</div>
+<div><span class="pill">&#10004; 100% offline &mdash; runs entirely in your browser, nothing is uploaded</span></div>
+
+<div class="tabs">
+  <button class="active" data-tab="bc">BC track format</button>
+  <button data-tab="aamva">AAMVA DL subfile</button>
+  <button data-tab="raw">Raw payload &rarr; PDF417</button>
+  <button data-tab="batch">Batch &rarr; ZIP</button>
+</div>
+
+<div class="panel active" id="p-bc">
+  <h3>BC combined-card style &mdash; magnetic-stripe tracks in a PDF417</h3>
+  __FIELDS__
+  <div class="section opts">
+    <div><label>Height format (track 3)</label>
+      <select id="height_mode"><option value="fi">feet+inches (510)</option>
+      <option value="cm">centimetres (178)</option></select></div>
+    <div><label>BC &ldquo;_%&rdquo; quirk</label>
+      <select id="bc_quirk"><option value="1">on (real BC cards)</option>
+      <option value="0">off (standard %)</option></select></div>
+    <div><label>Track joiner</label>
+      <select id="joiner"><option value="">none</option>
+      <option value="\n">LF</option><option value="\r">CR</option></select></div>
+    __RENDER_OPTS__
+    <div><button class="ghost" type="button" data-sample>&#8635; Load sample identity</button>
+    <button class="go" data-gen="bc">Generate BC barcode</button></div>
+  </div>
+</div>
+
+<div class="panel" id="p-aamva">
+  <h3>Standard AAMVA DL subfile (ANSI header + element IDs)</h3>
+  __FIELDS__
+  <div class="section opts">
+    <div><label>AAMVA version</label><select id="aa_version">
+      <option>09</option><option>02</option><option>03</option><option>06</option>
+      <option>08</option><option>10</option></select></div>
+    <div><label>Date format</label><select id="aa_datefmt">
+      <option value="CCYYMMDD">CCYYMMDD (Canada)</option>
+      <option value="MMDDCCYY">MMDDCCYY (US)</option></select></div>
+    <div><label>Element separator</label><select id="aa_sep">
+      <option value="cr">CR (0x0D)</option><option value="lf">LF (0x0A)</option></select></div>
+    <div><label>DAU height unit</label><select id="aa_hunit">
+      <option value="cm">cm</option><option value="in">in</option></select></div>
+    __RENDER_OPTS__
+    <div><button class="ghost" type="button" data-sample>&#8635; Load sample identity</button>
+    <button class="go" data-gen="aamva">Generate AAMVA barcode</button></div>
+  </div>
+</div>
+
+<div class="panel" id="p-raw">
+  <h3>Render any raw payload as PDF417</h3>
+  <p style="color:var(--muted);font-size:13px;margin-top:0">Paste a payload captured from a
+  real-world specimen (escapes such as <code>\n</code>, <code>\r</code>, <code>\x1e</code>
+  are interpreted).</p>
+  <textarea id="raw_payload">@\n\x1e\rANSI 636028090001DL00310160DLDCA5\rDCBNONE\rDCDNONE\rDBA20290515\rDCSSAMPLECARD\rDACTEST\rDADQ\rDBD20240102\rDBB19900515\rDBC1\rDAYBRO\rDAU178 cm\rDAG123 SAMPLE AVE\rDAIVICTORIA\rDAJBC\rDAKV8W2E4     \rDAQ1234567\rDCG CAN</textarea>
+  <div class="section opts">
+    __RENDER_OPTS__
+    <div><button class="go" data-gen="raw">Render raw payload</button></div>
+  </div>
+</div>
+
+<div class="panel" id="p-batch">
+  <h3>Batch mode &mdash; ZIP of randomized synthetic identities</h3>
+  <p style="color:var(--muted);font-size:13px;margin-top:0">Produces a ZIP with
+  <b>barcodes/*.png</b>, <b>payloads/*.txt</b> and <b>manifest.json</b> (payloads, hex and
+  expected parse values &mdash; ready-made for test assertions). Slots 0&ndash;3 are deterministic
+  edge cases: name truncation, missing fields, sex&nbsp;X, heavy data.</p>
+  <div class="opts">
+    <div><label>Count (1&ndash;500)</label>
+      <input id="bcount" type="number" value="50" min="1" max="500"></div>
+    <div><label>Format</label>
+      <select id="bmode"><option value="mixed">mixed (alternating)</option>
+      <option value="bc">BC track format</option>
+      <option value="aamva">AAMVA subfile</option></select></div>
+    <div><label>Seed (blank = random)</label>
+      <input id="bseed" type="number" placeholder="e.g. 42"></div>
+    __RENDER_OPTS__
+    <div><button class="go" id="btn_batch">Generate ZIP</button></div>
+  </div>
+  <div id="batch_done" class="section" style="display:none">
+    <a id="dl_zip" download="licence_test_batch.zip">&#11015;&#65039; Download batch ZIP</a>
+    <span id="batch_size" style="margin-left:12px;color:var(--muted)"></span>
+  </div>
+  <div class="err" id="batch_err"></div>
+</div>
+
+<div id="result"><article>
+  <h3>Result</h3>
+  <img id="bcimg" alt="generated PDF417 barcode">
+  <div class="row">
+    <a id="dl_png" download="licence_test_barcode.png">&#11015;&#65039; Download PNG</a>
+    <a id="dl_txt" download="licence_test_payload.txt">&#11015;&#65039; Download payload (.txt)</a>
+    <a id="dl_hex" download="licence_test_payload.hex">&#11015;&#65039; Download hex dump</a>
+  </div>
+  <h3 style="margin-top:16px">Payload (escaped)</h3><pre id="ptext"></pre>
+  <h3>Payload (hex)</h3><pre id="phex"></pre>
+  <div class="err" id="errbox"></div>
+</article></div>
+
+<footer>
+BC track layout per Province of BC MSP Teleplan spec &amp; AAMVA Annex F &middot; BC IIN 636028
+&middot; PDF417 = ISO/IEC 15438 &middot; barcodes unencrypted by design.<br>
+<b>Host this page anywhere:</b> it is a single static file &mdash; drop it on GitHub Pages,
+Netlify, Vercel, Cloudflare Pages, S3&hellip; or just double-click it locally. No server required.
+</footer>
+
+<script>/*__BWIPJS__*/</script>
+<script>/*__JSZIP__*/</script>
+<script>/*__APP__*/</script>
+</body>
+</html>
