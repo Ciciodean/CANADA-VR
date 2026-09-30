@@ -276,6 +276,27 @@ function loadSample(panelEl, rngNext = Math.random) {
   });
 }
 
+/* ============ ANSI header / subfile designator sanity check (raw mode) ============ */
+
+function designatorCheck(p) {
+  const out = [];
+  const m = /^@\n\x1e\rANSI ([0-9A-Za-z]{6})(\d{2})(\d{2})(\d{2})/.exec(p);
+  if (!m) {
+    if (p[0] === '@') out.push('starts with @ but ANSI header is malformed');
+    return out;
+  }
+  const entries = parseInt(m[4], 10), hdrLen = m[0].length,
+        dataStart = hdrLen + entries * 10;
+  const type = p.substr(hdrLen, 2), off = parseInt(p.substr(hdrLen + 2, 4), 10),
+        len = parseInt(p.substr(hdrLen + 6, 4), 10);
+  if (off !== dataStart) out.push(`${type} offset says ${off}, correct is ${dataStart}`);
+  if (entries === 1) {
+    const actual = p.length - dataStart;
+    if (len !== actual) out.push(`${type} length says ${len} but actual subfile is ${actual} bytes — strict decoders drop the last ${actual - len} byte(s)`);
+  }
+  return out;
+}
+
 /* ================= helpers ================= */
 
 const interpEscapes = s => s.replace(/\\(x[0-9a-fA-F]{2}|n|r|t|0)/g, (m, e) =>
@@ -355,6 +376,10 @@ async function onGenerate(mode) {
     const canvas = renderToCanvas(payload, renderOpts(panel));
     showResult(payload, canvas);
     errBox.textContent = '';
+    if (mode === 'raw') {
+      const w = designatorCheck(payload);
+      if (w.length) errBox.textContent = '⚠ Designator check: ' + w.join(' · ');
+    }
   } catch (exc) {
     document.getElementById('result').style.display = 'block';
     errBox.textContent = 'Error: ' + exc.message;
@@ -453,6 +478,6 @@ if (typeof module !== 'undefined' && module.exports) {
     buildBcTrack1, buildBcTrack2, buildBcTrack3, buildBcPayload,
     buildAamvaPayload, mulberry32, makeRng, randomIdentity,
     applyEdgeCases, expectedFields, interpEscapes, escRepr, hexDump,
-    SAMPLES, loadSample,
+    SAMPLES, loadSample, designatorCheck,
   };
 }

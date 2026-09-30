@@ -126,7 +126,7 @@ PAGE = """<!doctype html>
   <h3>Render any raw payload as PDF417</h3>
   <p style="color:var(--muted);font-size:13px;margin-top:0">Paste a payload you captured from a
   real-world specimen (decode escapes such as \\n, \\r, \\x1e are interpreted).</p>
-  <textarea id="raw_payload">@\\n\\x1e\\rANSI 636028090001DL00310160DLDCA5\\rDCBNONE\\rDCDNONE\\rDBA20290515\\rDCSSAMPLECARD\\rDACTEST\\rDADQ\\rDBD20240102\\rDBB19900515\\rDBC1\\rDAYBRO\\rDAU178 cm\\rDAG123 SAMPLE AVE\\rDAIVICTORIA\\rDAJBC\\rDAKV8W2E4     \\rDAQ1234567\\rDCG CAN</textarea>
+  <textarea id="raw_payload">@\\n\\x1e\\rANSI 636028090001DL00310175DCA5\\rDCBNONE\\rDCDNONE\\rDBA20290515\\rDCSSAMPLECARD\\rDACTEST\\rDADQ\\rDBD20240102\\rDBB19900515\\rDBC1\\rDAYBRO\\rDAU178 cm\\rDAG123 SAMPLE AVE\\rDAIVICTORIA\\rDAJBC\\rDAKV8W2E4     \\rDAQ1234567\\rDCGCAN\\r</textarea>
   <div class="section opts">
     __RENDER_OPTS__
     <div><button class="go" onclick="generate('raw')">Render raw payload</button></div>
@@ -228,6 +228,20 @@ function collectFields(root){
   root.querySelectorAll('input[data-f],select[data-f]').forEach(el=>d[el.dataset.f]=el.value);
   return d;
 }
+function designatorCheck(p){
+  const out=[];
+  const m=/^@\\n\\x1e\\rANSI ([0-9A-Za-z]{6})(\\d{2})(\\d{2})(\\d{2})/.exec(p);
+  if(!m){ if(p[0]==='@') out.push('starts with @ but ANSI header is malformed'); return out; }
+  const entries=parseInt(m[4],10), hdrLen=m[0].length, dataStart=hdrLen+entries*10;
+  const type=p.substr(hdrLen,2), off=parseInt(p.substr(hdrLen+2,4),10),
+        len=parseInt(p.substr(hdrLen+6,4),10);
+  if(off!==dataStart) out.push(`${type} offset says ${off}, correct is ${dataStart}`);
+  if(entries===1){
+    const actual=p.length-dataStart;
+    if(len!==actual) out.push(`${type} length says ${len} but actual subfile is ${actual} bytes — strict decoders drop the last ${actual-len} byte(s)`);
+  }
+  return out;
+}
 async function generate(mode){
   const panel = document.getElementById('p-'+mode);
   const body = { mode, fields: collectFields(panel),
@@ -253,6 +267,8 @@ async function generate(mode){
   const err = document.getElementById('errbox');
   if(data.error){ err.textContent = 'Error: '+data.error; return; }
   err.textContent='';
+  if(mode==='raw'){ const w = designatorCheck(body.raw);
+    if(w.length) err.textContent = '\u26a0 Designator check: '+w.join(' \u00b7 '); }
   document.getElementById('bcimg').src='data:image/png;base64,'+data.png_b64;
   document.getElementById('ptext').textContent=data.payload_repr;
   document.getElementById('phex').textContent=data.payload_hex;
